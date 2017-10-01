@@ -10,6 +10,7 @@ class FSM {
     	this.config = config;
     	this.clear = 0;
     	this.state = 'normal';
+    	this.states = config.states;
     	
     }
 
@@ -18,8 +19,9 @@ class FSM {
      * @returns {String}
      */
     getState() {
-    	if (this.state )
-    	return this.state;
+    	if (this.state){
+    		return this.state;
+    	}
     }
 
     /**
@@ -30,14 +32,16 @@ class FSM {
     		this.state = state;
     	}
 
-
     /**
      * Changes state according to event transition rules.
      * @param event
      */
     trigger(event) {
-    	this.event = event;
-
+    	for (var i in this.states) {
+    			if (this.states[i].transitions.hasOwnProperty(event)) {
+    				
+    			}
+    	}
     }
 
     /**
@@ -57,11 +61,15 @@ class FSM {
     	var a = [];
     	a = Object.keys(this.config.states);
     	if (event === undefined) {
-    		return a
-    	} else if (0) {
-    		
-    	} else if (0) {
-
+    		return a;
+    	} else if ( arguments.length != 0) {
+    		a = [];
+    		for (var i in this.states) {
+    			if (this.states[i].transitions.hasOwnProperty(event)) {
+    				a.push(i);
+    			}
+    		}
+    		return a;
     	} else {
     		return [];
     	}
