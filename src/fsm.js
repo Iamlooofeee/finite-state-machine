@@ -8,7 +8,6 @@ class FSM {
     		throw new Error;
     	}
     	this.config = config;
-    	this.config_1 = config.states;
     	this.clear = 0;
     	this.states = config.states;
 
@@ -91,8 +90,9 @@ class FSM {
     undo() {
     	if (this.clear === 1) {
     		return false;
+    	} else {
+    		return true;
     	}
-    	this.state = this.
     }
 
     /**
