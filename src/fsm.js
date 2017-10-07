@@ -8,9 +8,13 @@ class FSM {
     		throw new Error;
     	}
     	this.config = config;
+    	this.config_1 = config.states;
     	this.clear = 0;
-    	this.state = 'normal';
     	this.states = config.states;
+
+    	this.initial = config.initial;   
+        this.state = this.initial; 
+        this.states = config.states;
     	
     }
 
@@ -29,19 +33,23 @@ class FSM {
      * @param state
      */
     changeState(state) {
-    		this.state = state;
-    	}
+    	this.state = state;
+    	
+
+    }
 
     /**
      * Changes state according to event transition rules.
      * @param event
      */
     trigger(event) {
-    	for (var i in this.states) {
-    			if (this.states[i].transitions.hasOwnProperty(event)) {
-    				
-    			}
-    	}
+		for (var prop in this.states[this.state].transitions) {
+            if (prop === event) {
+                this.state = this.states[this.state].transitions[event];
+                return;
+            }
+        }
+        throw new Error();
     }
 
     /**
@@ -83,9 +91,8 @@ class FSM {
     undo() {
     	if (this.clear === 1) {
     		return false;
-    	} else {
-    		return true;
     	}
+    	this.state = this.
     }
 
     /**
