@@ -42,11 +42,13 @@ class FSM {
      * @param event
      */
     trigger(event) {
-		for (var prop in this.states[this.state].transitions) {
-            if (prop === event) {
-                this.state = this.states[this.state].transitions[event];
-                return;
-            }
+		for ( var key in this.states ) {
+        	for (var key1 in this.states[key].transitions ) {
+        		if (key1 === event) {
+        			this.state = this.states[key].transitions[key1];
+        			return;
+        		}
+        	}
         }
         throw new Error();
     }
@@ -88,11 +90,34 @@ class FSM {
      * @returns {Boolean}
      */
     undo() {
+    	var bool=true;
     	if (this.clear === 1) {
     		return false;
-    	} else {
-    		return true;
     	}
+
+		var num;
+        for ( var key in this.config ) {
+			var a=[],str;
+			a.push(Object.getOwnPropertyNames(this.config[key]));
+        }
+        str = a.join();
+        a = str.split(',')
+
+		for ( var key in this.states ) {
+        	for (var key1 in this.states[key].transitions ) {
+        		if (this.state === this.states[key].transitions[key1]) {
+        			num = a.indexOf(key);
+        			if(num === 0) {
+        				bool = false;
+        				return bool;
+        			} else {
+        				this.state = a[num-1]
+        				console.log(this.state)
+        			}
+        		}
+        	}
+        }
+
     }
 
     /**
