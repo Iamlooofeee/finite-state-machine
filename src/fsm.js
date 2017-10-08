@@ -9,10 +9,8 @@ class FSM {
     	}
     	this.config = config;
     	this.clear = 0;
-    	this.states = config.states;
-
-    	this.initial = config.initial;   
-        this.state = this.initial; 
+    	this.states = config.states 
+        this.state = config.initial; 
         this.states = config.states;
     	
     }
@@ -22,9 +20,7 @@ class FSM {
      * @returns {String}
      */
     getState() {
-    	if (this.state){
-    		return this.state;
-    	}
+    	return this.state;
     }
 
     /**
@@ -32,10 +28,17 @@ class FSM {
      * @param state
      */
     changeState(state) {
-    	this.state = state;
-    	
-
+		for ( var key in this.states ) {
+        	for (var key1 in this.states[key].transitions ) {
+        		if(state === this.states[key].transitions[key1]) {
+        			this.state = state;
+        			return;
+        		}
+        	}
+        }
+        throw new Error();
     }
+
 
     /**
      * Changes state according to event transition rules.
@@ -44,7 +47,7 @@ class FSM {
     trigger(event) {
 		for ( var key in this.states ) {
         	for (var key1 in this.states[key].transitions ) {
-        		if (key1 === event) {
+        		if (key1 === event+) {
         			this.state = this.states[key].transitions[key1];
         			return;
         		}
@@ -57,7 +60,7 @@ class FSM {
      * Resets FSM state to initial.
      */
     reset() {
-    	this.state = 'normal';
+    	this.state = this.config.initial;;
     }
 
     /**
@@ -94,6 +97,9 @@ class FSM {
     	if (this.clear === 1) {
     		return false;
     	}
+    	if(this.state === undefined) {
+    		return false;
+    	}
 
 		var num;
         for ( var key in this.config ) {
@@ -108,11 +114,10 @@ class FSM {
         		if (this.state === this.states[key].transitions[key1]) {
         			num = a.indexOf(key);
         			if(num === 0) {
-        				bool = false;
-        				return bool;
+        				return false;
         			} else {
-        				this.state = a[num-1]
-        				console.log(this.state)
+        				this.state = a[num-1];
+        				return true;
         			}
         		}
         	}
@@ -128,9 +133,14 @@ class FSM {
     redo() {
     	if (this.clear === 1) {
     		return false;
+    	} 
+
+    	if (!this.undo()) {
+    		return false;
     	} else {
     		return true;
     	}
+
     }
 
     /**
