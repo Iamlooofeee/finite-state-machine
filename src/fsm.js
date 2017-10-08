@@ -47,7 +47,7 @@ class FSM {
     trigger(event) {
 		for ( var key in this.states ) {
         	for (var key1 in this.states[key].transitions ) {
-        		if (key1 === event+) {
+        		if (key1 === event) {
         			this.state = this.states[key].transitions[key1];
         			return;
         		}
