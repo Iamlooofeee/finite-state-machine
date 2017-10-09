@@ -4,15 +4,17 @@ class FSM {
      * @param config
      */
     constructor(config) {
+    	this.a = 0;
     	if (config === undefined) {
     		throw new Error;
     	}
     	this.config = config;
     	this.clear = 0;
-    	this.states = config.states 
+    	this.states = config.states;
         this.state = config.initial; 
         this.states = config.states;
-    	
+    	this.check = 0;
+    	this.bool = false;
     }
 
     /**
@@ -20,6 +22,7 @@ class FSM {
      * @returns {String}
      */
     getState() {
+    	this.bool = true;
     	return this.state;
     }
 
@@ -28,6 +31,7 @@ class FSM {
      * @param state
      */
     changeState(state) {
+    	this.bool = true;
 		for ( var key in this.states ) {
         	for (var key1 in this.states[key].transitions ) {
         		if(state === this.states[key].transitions[key1]) {
@@ -45,6 +49,10 @@ class FSM {
      * @param event
      */
     trigger(event) {
+    	this.bool = true;
+		if (this.check === 1) {
+       		throw new Error;
+       	}
 		for ( var key in this.states ) {
         	for (var key1 in this.states[key].transitions ) {
         		if (key1 === event) {
@@ -53,13 +61,15 @@ class FSM {
         		}
         	}
         }
-        throw new Error();
+       	this.check = 1;
+       	throw new Error;
     }
 
     /**
      * Resets FSM state to initial.
      */
     reset() {
+    	this.bool = true;
     	this.state = this.config.initial;;
     }
 
@@ -70,6 +80,7 @@ class FSM {
      * @returns {Array}
      */
     getStates(event) {
+    	this.bool = true;
     	var a = [];
     	a = Object.keys(this.config.states);
     	if (event === undefined) {
@@ -93,7 +104,10 @@ class FSM {
      * @returns {Boolean}
      */
     undo() {
-    	var bool=true;
+    	if (!this.bool) {
+    		return false;
+    	}
+    	this.bool = true;
     	if (this.clear === 1) {
     		return false;
     	}
@@ -108,7 +122,7 @@ class FSM {
         }
         str = a.join();
         a = str.split(',')
-
+        
 		for ( var key in this.states ) {
         	for (var key1 in this.states[key].transitions ) {
         		if (this.state === this.states[key].transitions[key1]) {
@@ -122,7 +136,6 @@ class FSM {
         		}
         	}
         }
-
     }
 
     /**
@@ -133,20 +146,18 @@ class FSM {
     redo() {
     	if (this.clear === 1) {
     		return false;
-    	} 
-
-    	if (!this.undo()) {
+    	} else if (!this.bool) {
+    		return this.bool;
+    	} else if (!this.undo()) {
     		return false;
-    	} else {
-    		return true;
     	}
-
     }
 
     /**
      * Clears transition history
      */
     clearHistory() {
+    	this.bool = true;
     	this.clear = 1;
     }
 }
