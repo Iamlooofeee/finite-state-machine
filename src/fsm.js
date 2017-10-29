@@ -8,13 +8,16 @@ class FSM {
     	if (config === undefined) {
     		throw new Error;
     	}
+    	
     	this.config = config;
-    	this.clear = 0;
     	this.states = config.states;
         this.state = config.initial; 
-        this.states = config.states;
-    	this.check = 0;
     	this.bool = false;
+        this.check = 0;
+        this.initial = config.initial;
+
+        this.masStates = [this.initial];
+        this.delStates = [];
     }
 
     /**
@@ -22,7 +25,6 @@ class FSM {
      * @returns {String}
      */
     getState() {
-    	this.bool = true;
     	return this.state;
     }
 
@@ -36,11 +38,13 @@ class FSM {
         	for (var key1 in this.states[key].transitions ) {
         		if(state === this.states[key].transitions[key1]) {
         			this.state = state;
+                    this.masStates.push(this.state);
+                    this.bool = false;
         			return;
         		}
         	}
         }
-        throw new Error();
+        throw new Error;
     }
 
 
@@ -49,28 +53,30 @@ class FSM {
      * @param event
      */
     trigger(event) {
-    	this.bool = true;
-		if (this.check === 1) {
-       		throw new Error;
-       	}
+        if (this.check === 1) {
+            throw new Error;
+        }
+
 		for ( var key in this.states ) {
         	for (var key1 in this.states[key].transitions ) {
         		if (key1 === event) {
         			this.state = this.states[key].transitions[key1];
+                    this.masStates.push(this.state);
+                    this.bool = false;
         			return;
         		}
         	}
         }
-       	this.check = 1;
-       	throw new Error;
+        this.check = 1;
+        throw new Error;
     }
 
     /**
      * Resets FSM state to initial.
      */
     reset() {
-    	this.bool = true;
-    	this.state = this.config.initial;;
+    	this.state = this.initial;
+        this.masStates = [this.initial];
     }
 
     /**
@@ -80,23 +86,19 @@ class FSM {
      * @returns {Array}
      */
     getStates(event) {
-    	this.bool = true;
-    	var a = [];
-    	a = Object.keys(this.config.states);
-    	if (event === undefined) {
-    		return a;
-    	} else if ( arguments.length != 0) {
-    		a = [];
-    		for (var i in this.states) {
-    			if (this.states[i].transitions.hasOwnProperty(event)) {
-    				a.push(i);
-    			}
-    		}
-    		return a;
-    	} else {
-    		return [];
-    	}
+    	var arr = [];
+        if (event) {
+            for (var key in this.states) {
+                	if (this.states[key].transitions.hasOwnProperty(event)) {
+                    arr.push(key);     
+                	}
+			}
+            return arr;
+        } else {
+            return Object.keys(this.states);
+        }
     }
+
 
     /**
      * Goes back to previous state.
@@ -104,37 +106,14 @@ class FSM {
      * @returns {Boolean}
      */
     undo() {
-    	if (!this.bool) {
-    		return false;
-    	}
-    	this.bool = true;
-    	if (this.clear === 1) {
-    		return false;
-    	}
-    	if(this.state === undefined) {
-    		return false;
-    	}
-
-		var num;
-        for ( var key in this.config ) {
-			var a=[],str;
-			a.push(Object.getOwnPropertyNames(this.config[key]));
-        }
-        str = a.join();
-        a = str.split(',')
-        
-		for ( var key in this.states ) {
-        	for (var key1 in this.states[key].transitions ) {
-        		if (this.state === this.states[key].transitions[key1]) {
-        			num = a.indexOf(key);
-        			if(num === 0) {
-        				return false;
-        			} else {
-        				this.state = a[num-1];
-        				return true;
-        			}
-        		}
-        	}
+    	if (this.masStates.length >= 2) {
+            this.state = this.masStates[this.masStates.length-2];
+            this.delStates.push(this.masStates[this.masStates.length-1]);
+            this.masStates.pop();
+            this.bool = true;
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -144,21 +123,26 @@ class FSM {
      * @returns {Boolean}
      */
     redo() {
-    	if (this.clear === 1) {
-    		return false;
-    	} else if (!this.bool) {
-    		return this.bool;
-    	} else if (!this.undo()) {
-    		return false;
-    	}
+    	if (this.delStates.length > 0) {
+            if (this.bool) {
+                this.state = this.delStates[this.delStates.length-1];
+                this.masStates.push(this.delStates[this.delStates.length-1]);
+                this.delStates.pop();               
+                return true;
+            } else {
+             return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     /**
      * Clears transition history
      */
     clearHistory() {
-    	this.bool = true;
-    	this.clear = 1;
+    	this.masStates = [this.initial];
+        this.delStates = [];
     }
 }
 
